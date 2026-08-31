@@ -1,0 +1,14 @@
+# Optional graph visualization. Run against MARITIME_SS_GS_KG.
+PREFIX mao:  <https://example.org/maritime-actionable-ontology/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?detailType rdfs:subClassOf mao:ReviewCandidateAssessment .
+}
+WHERE {
+  VALUES ?detailType {
+    mao:MissAssessment
+    mao:TightAssessment
+  }
+  ?detailType rdfs:subClassOf mao:ReviewCandidateAssessment .
+}

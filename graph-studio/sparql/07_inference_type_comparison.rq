@@ -1,0 +1,20 @@
+# Run this exact query twice:
+#   MARITIME_SS_GS_ABOX shows only the SQL-projected specific type.
+#   MARITIME_SS_GS_KG also shows the superclass types added by OWL2RL.
+PREFIX mao: <https://example.org/maritime-actionable-ontology/ontology/>
+
+SELECT DISTINCT ?connectionId ?typeName
+WHERE {
+  ?assessment mao:connectionId ?connectionId ;
+              a ?assessmentType .
+  FILTER (STR(?connectionId) IN ("CONN-MAR-001", "CONN-MAR-010", "CONN-MAR-016"))
+  FILTER (?assessmentType IN (
+    mao:MissAssessment,
+    mao:TightAssessment,
+    mao:KeepAssessment,
+    mao:ConnectionAssessment,
+    mao:ReviewCandidateAssessment
+  ))
+  BIND(STRAFTER(STR(?assessmentType), STR(mao:)) AS ?typeName)
+}
+ORDER BY ?connectionId ?typeName

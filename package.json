@@ -1,0 +1,11 @@
+{
+  "name": "maritime-actionable-ontology-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic maritime ship-to-shore decision-support reference implementation.",
+  "scripts": {
+    "build:graph-studio-assets": "node graph-studio/rdf-assets/build_graph_studio_rdf_assets.mjs",
+    "test": "node scripts/validate_public_repo.mjs"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "purpose": "Graph Studio presentation copy; authoritative RDF remains MARITIME_DEMO.MARITIME_SS_RDF_NET",
+  "generatedAt": "2026-08-31T07:35:21.583Z",
+  "source": {
+    "fixtureVersion": "MARITIME-AO-FIXTURE-0.1.0",
+    "ontologyVersion": "MARITIME-AO-ONTOLOGY-0.2.0",
+    "policyVersion": "MARITIME-AO-CONNECTION-0.1.0",
+    "sourceNetwork": "MARITIME_DEMO.MARITIME_SS_RDF_NET",
+    "sourceTboxGraph": "MARITIME_SS_TBOX",
+    "sourceAboxGraph": "MARITIME_SS_ABOX",
+    "activeSourceCollection": "MARITIME_SS_KG_A"
+  },
+  "graphStudioObjects": {
+    "tboxGraph": "MARITIME_SS_GS_TBOX",
+    "aboxGraph": "MARITIME_SS_GS_ABOX",
+    "collection": "MARITIME_SS_GS_KG",
+    "rulebase": "OWL2RL"
+  },
+  "files": {
+    "maritime_actionable_ontology_gs_tbox.ttl": {
+      "expectedTriples": 134,
+      "sha256": "372fad78d7f34fc4d224fd8899e7cf3b8553b693d93925c6cf3969b3068088b5"
+    },
+    "maritime_actionable_ontology_gs_abox.nt": {
+      "expectedTriples": 664,
+      "sha256": "3da19d5f138c31380d82a3c194b3a081fe7ca55c22539c3efdd47e68054995ef"
+    }
+  },
+  "expectedResults": {
+    "assessmentRows": 36,
+    "miss": 9,
+    "tight": 6,
+    "keep": 21,
+    "reviewCandidate": 15
+  }
+}

@@ -1,0 +1,156 @@
+@prefix mao: <https://example.org/maritime-actionable-ontology/ontology/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Canonical Maritime Actionable Ontology demo vocabulary. Operational timestamp arithmetic
+# and MISS/TIGHT/KEEP classification remain in versioned SQL. OWL only carries
+# the asserted SQL result into a reusable semantic hierarchy.
+
+<https://example.org/maritime-actionable-ontology/ontology> rdf:type owl:Ontology .
+<https://example.org/maritime-actionable-ontology/ontology> owl:versionIRI <https://example.org/maritime-actionable-ontology/ontology/0.2.0> .
+<https://example.org/maritime-actionable-ontology/ontology> owl:versionInfo "MARITIME-AO-ONTOLOGY-0.2.0" .
+<https://example.org/maritime-actionable-ontology/ontology> rdfs:label "Synthetic Maritime Actionable Ontology Demo Ontology"@en .
+<https://example.org/maritime-actionable-ontology/ontology> rdfs:comment "Synthetic demonstration vocabulary only. It does not describe production data or authorize operational action."@en .
+
+mao:MaritimeObject rdf:type owl:Class .
+mao:Vessel rdf:type owl:Class .
+mao:Voyage rdf:type owl:Class .
+mao:Port rdf:type owl:Class .
+mao:PortCall rdf:type owl:Class .
+mao:ShippingContainer rdf:type owl:Class .
+mao:Booking rdf:type owl:Class .
+mao:ContainerConnection rdf:type owl:Class .
+mao:EtaEvent rdf:type owl:Class .
+mao:DelayIncident rdf:type owl:Class .
+mao:ConnectionAssessment rdf:type owl:Class .
+mao:MissAssessment rdf:type owl:Class .
+mao:TightAssessment rdf:type owl:Class .
+mao:KeepAssessment rdf:type owl:Class .
+mao:ReviewCandidateAssessment rdf:type owl:Class .
+mao:ActionPreview rdf:type owl:Class .
+mao:SemanticRunContext rdf:type owl:Class .
+
+mao:Vessel rdfs:subClassOf mao:MaritimeObject .
+mao:Voyage rdfs:subClassOf mao:MaritimeObject .
+mao:Port rdfs:subClassOf mao:MaritimeObject .
+mao:PortCall rdfs:subClassOf mao:MaritimeObject .
+mao:ShippingContainer rdfs:subClassOf mao:MaritimeObject .
+mao:Booking rdfs:subClassOf mao:MaritimeObject .
+mao:ContainerConnection rdfs:subClassOf mao:MaritimeObject .
+mao:MissAssessment rdfs:subClassOf mao:ConnectionAssessment .
+mao:TightAssessment rdfs:subClassOf mao:ConnectionAssessment .
+mao:KeepAssessment rdfs:subClassOf mao:ConnectionAssessment .
+mao:MissAssessment rdfs:subClassOf mao:ReviewCandidateAssessment .
+mao:TightAssessment rdfs:subClassOf mao:ReviewCandidateAssessment .
+mao:ReviewCandidateAssessment rdfs:subClassOf mao:ConnectionAssessment .
+
+mao:ConnectionAssessment rdfs:comment "A policy-versioned assessment whose operational classification is asserted by SQL."@en .
+mao:MissAssessment rdfs:comment "An assessment typed from SQL DECISION_CODE=MISS; OWL does not calculate slack or compare timestamps."@en .
+mao:TightAssessment rdfs:comment "An assessment typed from SQL DECISION_CODE=TIGHT; OWL does not calculate slack or compare timestamps."@en .
+mao:KeepAssessment rdfs:comment "An assessment typed from SQL DECISION_CODE=KEEP; OWL does not calculate slack or compare timestamps."@en .
+mao:ReviewCandidateAssessment rdfs:comment "A semantic superclass inferred for SQL MISS and TIGHT assessments; it grants no approval or execution authority."@en .
+
+mao:operatedBy rdf:type owl:ObjectProperty .
+mao:operatedBy rdfs:domain mao:Voyage .
+mao:operatedBy rdfs:range mao:Vessel .
+mao:callsAt rdf:type owl:ObjectProperty .
+mao:callsAt rdfs:domain mao:Voyage .
+mao:callsAt rdfs:range mao:PortCall .
+mao:locatedAt rdf:type owl:ObjectProperty .
+mao:locatedAt rdfs:domain mao:PortCall .
+mao:locatedAt rdfs:range mao:Port .
+mao:reportedFor rdf:type owl:ObjectProperty .
+mao:reportedFor rdfs:domain mao:EtaEvent .
+mao:reportedFor rdfs:range mao:PortCall .
+mao:affectsPortCall rdf:type owl:ObjectProperty .
+mao:affectsPortCall rdfs:domain mao:DelayIncident .
+mao:affectsPortCall rdfs:range mao:PortCall .
+mao:containsContainer rdf:type owl:ObjectProperty .
+mao:containsContainer rdfs:domain mao:Booking .
+mao:containsContainer rdfs:range mao:ShippingContainer .
+mao:carriedOn rdf:type owl:ObjectProperty .
+mao:carriedOn rdfs:domain mao:ShippingContainer .
+mao:carriedOn rdfs:range mao:Voyage .
+mao:connectsTo rdf:type owl:ObjectProperty .
+mao:connectsTo rdfs:domain mao:ShippingContainer .
+mao:connectsTo rdfs:range mao:Voyage .
+mao:hasAssessment rdf:type owl:ObjectProperty .
+mao:hasAssessment rdfs:domain mao:ShippingContainer .
+mao:hasAssessment rdfs:range mao:ConnectionAssessment .
+mao:aboutIncident rdf:type owl:ObjectProperty .
+mao:aboutIncident rdfs:domain mao:ConnectionAssessment .
+mao:aboutIncident rdfs:range mao:DelayIncident .
+mao:assessesConnection rdf:type owl:ObjectProperty .
+mao:assessesConnection rdfs:domain mao:ConnectionAssessment .
+mao:assessesConnection rdfs:range mao:ContainerConnection .
+mao:assessesBooking rdf:type owl:ObjectProperty .
+mao:assessesBooking rdfs:domain mao:ConnectionAssessment .
+mao:assessesBooking rdfs:range mao:Booking .
+mao:selectedEtaEvent rdf:type owl:ObjectProperty .
+mao:selectedEtaEvent rdfs:domain mao:ConnectionAssessment .
+mao:selectedEtaEvent rdfs:range mao:EtaEvent .
+mao:decisionResult rdf:type owl:ObjectProperty .
+mao:decisionResult rdfs:domain mao:ConnectionAssessment .
+mao:decisionResult rdfs:range skos:Concept .
+mao:recommendsPreview rdf:type owl:ObjectProperty .
+mao:recommendsPreview rdfs:domain mao:DelayIncident .
+mao:recommendsPreview rdfs:range mao:ActionPreview .
+mao:forAssessment rdf:type owl:ObjectProperty .
+mao:forAssessment rdfs:domain mao:ActionPreview .
+mao:forAssessment rdfs:range mao:ReviewCandidateAssessment .
+
+mao:ConnectionDecisionScheme rdf:type skos:ConceptScheme .
+mao:ConnectionDecisionScheme skos:prefLabel "Connection decision vocabulary"@en .
+mao:Miss rdf:type skos:Concept .
+mao:Miss skos:inScheme mao:ConnectionDecisionScheme .
+mao:Miss skos:prefLabel "MISS"@en .
+mao:Miss skos:definition "The versioned SQL policy found estimated ready time later than load cutoff time."@en .
+mao:Tight rdf:type skos:Concept .
+mao:Tight skos:inScheme mao:ConnectionDecisionScheme .
+mao:Tight skos:prefLabel "TIGHT"@en .
+mao:Tight skos:definition "The versioned SQL policy found a non-missed connection inside its exact timestamp threshold."@en .
+mao:Keep rdf:type skos:Concept .
+mao:Keep skos:inScheme mao:ConnectionDecisionScheme .
+mao:Keep skos:prefLabel "KEEP"@en .
+mao:Keep skos:definition "The versioned SQL policy found estimated ready time at or before the exact threshold boundary."@en .
+
+mao:revisionNumber rdf:type owl:DatatypeProperty .
+mao:revisionNumber rdfs:range xsd:integer .
+mao:reportedEtaAt rdf:type owl:DatatypeProperty .
+mao:reportedEtaAt rdfs:range xsd:dateTime .
+mao:receivedAt rdf:type owl:DatatypeProperty .
+mao:receivedAt rdfs:range xsd:dateTime .
+mao:connectionId rdf:type owl:DatatypeProperty .
+mao:connectionId rdfs:range xsd:string .
+mao:connectionSlackMinutes rdf:type owl:DatatypeProperty .
+mao:connectionSlackMinutes rdfs:range xsd:integer .
+mao:connectionSlackSeconds rdf:type owl:DatatypeProperty .
+mao:connectionSlackSeconds rdfs:range xsd:integer .
+mao:fixtureVersion rdf:type owl:DatatypeProperty .
+mao:fixtureVersion rdfs:range xsd:string .
+mao:contractVersion rdf:type owl:DatatypeProperty .
+mao:contractVersion rdfs:range xsd:string .
+mao:ontologyVersion rdf:type owl:DatatypeProperty .
+mao:ontologyVersion rdfs:range xsd:string .
+mao:policyVersion rdf:type owl:DatatypeProperty .
+mao:policyVersion rdfs:range xsd:string .
+mao:dataAsOf rdf:type owl:DatatypeProperty .
+mao:dataAsOf rdfs:range xsd:dateTime .
+mao:runMode rdf:type owl:DatatypeProperty .
+mao:runMode rdfs:range xsd:string .
+mao:resultProvenance rdf:type owl:DatatypeProperty .
+mao:resultProvenance rdfs:range xsd:string .
+mao:approvalState rdf:type owl:DatatypeProperty .
+mao:approvalState rdfs:range xsd:string .
+mao:externalExecutionYn rdf:type owl:DatatypeProperty .
+mao:externalExecutionYn rdfs:range xsd:string .
+mao:dataScope rdf:type owl:DatatypeProperty .
+mao:dataScope rdfs:range xsd:string .
+
+# No OWL class expression derives MISS, TIGHT, or KEEP from a numeric literal.
+# SQL performs timestamp arithmetic and policy boundary comparisons; the ABox
+# projects that closed-world decision as both a specific assessment class and
+# a decisionResult concept. OWL only entails the declared superclass meaning.

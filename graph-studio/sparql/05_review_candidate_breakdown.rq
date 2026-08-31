@@ -1,0 +1,18 @@
+# Run against MARITIME_SS_GS_KG, where OWL2RL inferred superclass types are available.
+PREFIX mao: <https://example.org/maritime-actionable-ontology/ontology/>
+
+SELECT ?category (COUNT(DISTINCT ?assessment) AS ?assessmentCount)
+WHERE {
+  {
+    ?assessment a mao:ReviewCandidateAssessment .
+    BIND("TOTAL" AS ?category)
+  }
+  UNION
+  {
+    ?assessment a mao:ReviewCandidateAssessment ;
+                mao:decisionResult ?decision .
+    BIND(UCASE(STRAFTER(STR(?decision), STR(mao:))) AS ?category)
+  }
+}
+GROUP BY ?category
+ORDER BY ?category

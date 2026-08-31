@@ -1,0 +1,9 @@
+# Run this exact query twice to prove inference:
+#   MARITIME_SS_GS_ABOX -> 0  (not explicitly asserted)
+#   MARITIME_SS_GS_KG   -> 15 (added by OWL2RL inference)
+PREFIX mao: <https://example.org/maritime-actionable-ontology/ontology/>
+
+SELECT (COUNT(DISTINCT ?assessment) AS ?reviewCandidateCount)
+WHERE {
+  ?assessment a mao:ReviewCandidateAssessment .
+}

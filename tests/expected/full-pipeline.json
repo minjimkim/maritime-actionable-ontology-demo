@@ -1,0 +1,52 @@
+{
+  "fixtureVersion": "MARITIME-AO-FIXTURE-0.1.0",
+  "contractVersion": "MARITIME-AO-CONTRACT-0.1.0",
+  "ontologyVersion": "MARITIME-AO-ONTOLOGY-0.2.0",
+  "rulebaseVersion": "MARITIME-AO-RULEBASE-0.1.0",
+  "policyVersion": "MARITIME-AO-CONNECTION-0.1.0",
+  "advisoryContractVersion": "MARITIME-AO-ADVISORY-CONTRACT-0.1.0",
+  "baselineArtifactVersion": "MARITIME-AO-decision-support-BASELINE-0.1.0",
+  "scenarioId": "INC-MAR-0001",
+  "dataAsOf": "2026-08-12T09:00:00+09:00",
+  "dataScope": "SYNTHETIC_SHIP_SHORE_DEMO",
+  "runMode": "SYNTHETIC_DEMO",
+  "approvalState": "PREVIEW_ONLY",
+  "semantic": {
+    "queryAdapter": "SEMU_RDF_VALUE_SQL",
+    "javaDependentQueryCalls": 0,
+    "tboxTriples": 134,
+    "aboxTriples": 664,
+    "decisionRows": 36,
+    "reviewCandidateRows": 15,
+    "missRows": 9,
+    "tightRows": 6,
+    "keepRows": 21,
+    "negativeControlLeakRows": 0,
+    "futureEventDrivenRows": 0,
+    "decisionMismatchRows": 0
+  },
+  "graph": {
+    "edgeSourceAdapter": "MATERIALIZED_VIEW_FALLBACK",
+    "materializedViews": 7,
+    "vertexRows": 71,
+    "edgeRows": 158,
+    "pathRows": 36,
+    "pathContainerRows": 36,
+    "pathBookingRows": 18,
+    "missRows": 9,
+    "tightRows": 6,
+    "keepRows": 21,
+    "negativeControlLeakRows": 0
+  },
+  "advisory": {
+    "inputRows": 36,
+    "candidateRows": 15,
+    "baselineRows": 15,
+    "advisoryOnlyRows": 15,
+    "automaticActionAllowedRows": 0,
+    "externalExecutionRows": 0,
+    "decisionMutationRows": 0,
+    "actionMutationRows": 0,
+    "negativeControlLeakRows": 0
+  }
+}

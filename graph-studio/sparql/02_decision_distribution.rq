@@ -1,0 +1,11 @@
+# The active MARITIME_SS_KG_A/B collection is required for inferred superclass types.
+PREFIX mao: <https://example.org/maritime-actionable-ontology/ontology/>
+
+SELECT ?decisionCode (COUNT(DISTINCT ?assessment) AS ?assessmentCount)
+WHERE {
+  ?assessment a mao:ConnectionAssessment ;
+              mao:decisionResult ?decision .
+  BIND(STRAFTER(STR(?decision), STR(mao:)) AS ?decisionCode)
+}
+GROUP BY ?decisionCode
+ORDER BY ?decisionCode

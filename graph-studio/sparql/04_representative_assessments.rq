@@ -1,0 +1,20 @@
+# Run against the active MARITIME_SS_KG_A/B collection.
+PREFIX mao: <https://example.org/maritime-actionable-ontology/ontology/>
+
+SELECT ?connectionId ?decisionCode ?slackMinutes
+       (IF(BOUND(?reviewType), "Y", "N") AS ?reviewYn)
+WHERE {
+  ?assessment a mao:ConnectionAssessment ;
+              mao:connectionId ?connectionId ;
+              mao:decisionResult ?decision ;
+              mao:connectionSlackMinutes ?slackMinutes .
+  # ABox stores connectionId as xsd:string. STR keeps the filter independent
+  # of how the Query Playground renders/canonicalizes typed string literals.
+  FILTER (STR(?connectionId) IN ("CONN-MAR-001", "CONN-MAR-010", "CONN-MAR-016"))
+  OPTIONAL {
+    ?assessment a ?reviewType .
+    FILTER (?reviewType = mao:ReviewCandidateAssessment)
+  }
+  BIND(STRAFTER(STR(?decision), STR(mao:)) AS ?decisionCode)
+}
+ORDER BY ?connectionId

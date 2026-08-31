@@ -1,0 +1,5 @@
+# Select the active MARITIME_SS_KG_A/B RDF Graph Collection in Graph Studio first.
+SELECT (COUNT(*) AS ?tripleCount)
+WHERE {
+  ?subject ?predicate ?object .
+}

@@ -1,0 +1,10 @@
+# Run against the active MARITIME_SS_KG_A/B collection, not TBox or ABox alone.
+PREFIX mao:  <https://example.org/maritime-actionable-ontology/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?detailType
+WHERE {
+  ?detailType rdfs:subClassOf mao:ReviewCandidateAssessment .
+  FILTER (?detailType IN (mao:MissAssessment, mao:TightAssessment))
+}
+ORDER BY ?detailType

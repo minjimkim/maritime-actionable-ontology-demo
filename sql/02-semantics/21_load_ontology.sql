@@ -1,0 +1,771 @@
+-- Maritime Actionable Ontology Demo Kit
+-- Standalone TBox loader generated from ontology/maritime-actionable-ontology-core.ttl.
+-- The normalized source contract is MARITIME-AO-ONTOLOGY-0.2.0.
+
+SET SERVEROUTPUT ON
+
+PROMPT ================================================================
+PROMPT 21_load_ontology.sql
+PROMPT Load canonical Maritime Actionable Ontology OWL vocabulary into MARITIME_SS_TBOX
+PROMPT ================================================================
+
+DECLARE
+  l_user   VARCHAR2(128) := UPPER(SYS_CONTEXT('USERENV', 'SESSION_USER'));
+  l_schema VARCHAR2(128) := UPPER(SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA'));
+  l_count  NUMBER;
+BEGIN
+  IF l_user <> 'MARITIME_DEMO' OR l_schema <> 'MARITIME_DEMO' THEN
+    RAISE_APPLICATION_ERROR(-20000, 'Safety stop: connect directly as MARITIME_DEMO.');
+  END IF;
+
+  SELECT COUNT(*)
+    INTO l_count
+    FROM USER_OBJECTS
+   WHERE OBJECT_NAME = 'MARITIME_SS_RDF_NET#RDFT_MARITIME_SS_TBOX'
+     AND OBJECT_TYPE = 'VIEW';
+
+  IF l_count <> 1 THEN
+    RAISE_APPLICATION_ERROR(
+      -20521,
+      'MARITIME_SS_TBOX is missing. Run 20_create_semantic_network.sql first.'
+    );
+  END IF;
+END;
+/
+
+BEGIN
+  SEM_APIS.TRUNCATE_RDF_GRAPH(
+    rdf_graph_name => 'MARITIME_SS_TBOX',
+    network_owner  => 'MARITIME_DEMO',
+    network_name   => 'MARITIME_SS_RDF_NET'
+  );
+END;
+/
+
+DECLARE
+  c_graph   CONSTANT VARCHAR2(30) := 'MARITIME_SS_TBOX';
+  c_network CONSTANT VARCHAR2(30) := 'MARITIME_SS_RDF_NET';
+  l_owner   VARCHAR2(128) := 'MARITIME_DEMO';
+
+  PROCEDURE add_triple(
+    p_subject   IN VARCHAR2,
+    p_predicate IN VARCHAR2,
+    p_object    IN VARCHAR2
+  ) IS
+  BEGIN
+    INSERT INTO MARITIME_DEMO.MARITIME_SS_RDF_NET#RDFT_MARITIME_SS_TBOX (TRIPLE)
+    VALUES (
+      SDO_RDF_TRIPLE_S(
+        c_graph,
+        p_subject,
+        p_predicate,
+        p_object,
+        l_owner,
+        c_network
+      )
+    );
+  END add_triple;
+BEGIN
+  -- BEGIN GENERATED ONTOLOGY TRIPLES
+  -- Sources: ontology/maritime-actionable-ontology-core.ttl
+  -- Module versions: MARITIME-AO-ONTOLOGY-0.2.0
+  -- Normalized triple count: 134
+  -- Normalized triple-set SHA-256: e3a9080925db860da179c7bc2fac2d303e3c015a29a44aea5cbc02b6c0c30f32
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ActionPreview>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Booking>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Booking>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"A policy-versioned assessment whose operational classification is asserted by SQL."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionDecisionScheme>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2004/02/skos/core#ConceptScheme>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionDecisionScheme>',
+    '<http://www.w3.org/2004/02/skos/core#prefLabel>',
+    '"Connection decision vocabulary"@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ContainerConnection>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ContainerConnection>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/DelayIncident>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/EtaEvent>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Keep>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2004/02/skos/core#Concept>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Keep>',
+    '<http://www.w3.org/2004/02/skos/core#definition>',
+    '"The versioned SQL policy found estimated ready time at or before the exact threshold boundary."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Keep>',
+    '<http://www.w3.org/2004/02/skos/core#inScheme>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionDecisionScheme>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Keep>',
+    '<http://www.w3.org/2004/02/skos/core#prefLabel>',
+    '"KEEP"@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/KeepAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/KeepAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"An assessment typed from SQL DECISION_CODE=KEEP; OWL does not calculate slack or compare timestamps."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/KeepAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Miss>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2004/02/skos/core#Concept>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Miss>',
+    '<http://www.w3.org/2004/02/skos/core#definition>',
+    '"The versioned SQL policy found estimated ready time later than load cutoff time."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Miss>',
+    '<http://www.w3.org/2004/02/skos/core#inScheme>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionDecisionScheme>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Miss>',
+    '<http://www.w3.org/2004/02/skos/core#prefLabel>',
+    '"MISS"@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/MissAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/MissAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"An assessment typed from SQL DECISION_CODE=MISS; OWL does not calculate slack or compare timestamps."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/MissAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/MissAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Port>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Port>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"A semantic superclass inferred for SQL MISS and TIGHT assessments; it grants no approval or execution authority."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/SemanticRunContext>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Tight>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2004/02/skos/core#Concept>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Tight>',
+    '<http://www.w3.org/2004/02/skos/core#definition>',
+    '"The versioned SQL policy found a non-missed connection inside its exact timestamp threshold."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Tight>',
+    '<http://www.w3.org/2004/02/skos/core#inScheme>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionDecisionScheme>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Tight>',
+    '<http://www.w3.org/2004/02/skos/core#prefLabel>',
+    '"TIGHT"@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/TightAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/TightAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"An assessment typed from SQL DECISION_CODE=TIGHT; OWL does not calculate slack or compare timestamps."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/TightAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/TightAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Vessel>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Vessel>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Class>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>',
+    '<http://www.w3.org/2000/01/rdf-schema#subClassOf>',
+    '<https://example.org/maritime-actionable-ontology/ontology/MaritimeObject>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/aboutIncident>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/aboutIncident>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/aboutIncident>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/DelayIncident>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/affectsPortCall>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/affectsPortCall>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/DelayIncident>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/affectsPortCall>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/approvalState>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/approvalState>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesBooking>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesBooking>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesBooking>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Booking>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesConnection>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesConnection>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/assessesConnection>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ContainerConnection>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/callsAt>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/callsAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/callsAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/carriedOn>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/carriedOn>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/carriedOn>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionId>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionId>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionSlackMinutes>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionSlackMinutes>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#integer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionSlackSeconds>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectionSlackSeconds>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#integer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectsTo>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectsTo>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/connectsTo>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/containsContainer>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/containsContainer>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Booking>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/containsContainer>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/contractVersion>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/contractVersion>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/dataAsOf>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/dataAsOf>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#dateTime>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/dataScope>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/dataScope>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/decisionResult>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/decisionResult>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/decisionResult>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2004/02/skos/core#Concept>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/externalExecutionYn>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/externalExecutionYn>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/fixtureVersion>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/fixtureVersion>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/forAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/forAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ActionPreview>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/forAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ReviewCandidateAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/hasAssessment>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/hasAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ShippingContainer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/hasAssessment>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/locatedAt>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/locatedAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/locatedAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Port>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ontologyVersion>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/ontologyVersion>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/operatedBy>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/operatedBy>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Voyage>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/operatedBy>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/Vessel>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/policyVersion>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/policyVersion>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/receivedAt>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/receivedAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#dateTime>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/recommendsPreview>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/recommendsPreview>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/DelayIncident>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/recommendsPreview>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ActionPreview>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/reportedEtaAt>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/reportedEtaAt>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#dateTime>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/reportedFor>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/reportedFor>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/EtaEvent>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/reportedFor>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/PortCall>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/resultProvenance>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/resultProvenance>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/revisionNumber>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/revisionNumber>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#integer>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/runMode>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#DatatypeProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/runMode>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<http://www.w3.org/2001/XMLSchema#string>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/selectedEtaEvent>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#ObjectProperty>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/selectedEtaEvent>',
+    '<http://www.w3.org/2000/01/rdf-schema#domain>',
+    '<https://example.org/maritime-actionable-ontology/ontology/ConnectionAssessment>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology/selectedEtaEvent>',
+    '<http://www.w3.org/2000/01/rdf-schema#range>',
+    '<https://example.org/maritime-actionable-ontology/ontology/EtaEvent>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology>',
+    '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>',
+    '<http://www.w3.org/2002/07/owl#Ontology>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology>',
+    '<http://www.w3.org/2000/01/rdf-schema#comment>',
+    '"Synthetic demonstration vocabulary only. It does not describe production data or authorize operational action."@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology>',
+    '<http://www.w3.org/2000/01/rdf-schema#label>',
+    '"Synthetic Maritime Actionable Ontology Demo Ontology"@en'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology>',
+    '<http://www.w3.org/2002/07/owl#versionIRI>',
+    '<https://example.org/maritime-actionable-ontology/ontology/0.2.0>'
+  );
+  add_triple(
+    '<https://example.org/maritime-actionable-ontology/ontology>',
+    '<http://www.w3.org/2002/07/owl#versionInfo>',
+    '"MARITIME-AO-ONTOLOGY-0.2.0"'
+  );
+  -- END GENERATED ONTOLOGY TRIPLES
+  COMMIT;
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;
+    RAISE;
+END;
+/
+
+DECLARE
+  l_count NUMBER;
+BEGIN
+  SELECT COUNT(*)
+    INTO l_count
+    FROM MARITIME_DEMO.MARITIME_SS_RDF_NET#RDFT_MARITIME_SS_TBOX;
+
+  IF l_count <> 134 THEN
+    RAISE_APPLICATION_ERROR(
+      -20521,
+      'TBox load postcondition failed: expected 134 triples, found ' || l_count
+    );
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('PASS MARITIME_SS_TBOX loaded: 134 triples, ontology 0.2.0');
+END;
+/
+
+PROMPT ===> TBox ready. Next: sql/02-semantics/22_project_relational_facts.sql

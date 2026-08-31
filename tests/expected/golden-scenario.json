@@ -1,0 +1,116 @@
+{
+  "fixtureVersion": "MARITIME-AO-FIXTURE-0.1.0",
+  "contractVersion": "MARITIME-AO-CONTRACT-0.1.0",
+  "ontologyVersion": "MARITIME-AO-ONTOLOGY-0.2.0",
+  "policyVersion": "MARITIME-AO-CONNECTION-0.1.0",
+  "dataScope": "SYNTHETIC_SHIP_SHORE_DEMO",
+  "runMode": "SYNTHETIC_DEMO",
+  "resultProvenance": "SYNTHETIC_FIXTURE",
+  "scenario": {
+    "incidentId": "INC-MAR-0001",
+    "vesselId": "VES-MAR-DEMO-01",
+    "inboundVoyageId": "VYG-DEMO-2608E",
+    "portCallId": "PC-ALPHA-260812",
+    "asOf": "2026-08-12T09:00:00+09:00",
+    "plannedEta": "2026-08-12T07:00:00+09:00",
+    "priorAcceptedEta": "2026-08-12T07:00:00+09:00",
+    "revisedEta": "2026-08-12T14:00:00+09:00",
+    "revisionDeltaMinutes": 420,
+    "scheduleVarianceMinutes": 420
+  },
+  "policy": {
+    "missBelowMinutes": 0,
+    "tightBelowMinutes": 90,
+    "maxIngestLagMinutes": 5
+  },
+  "etaEvents": [
+    {
+      "etaEventId": "ETA-MAR-0001",
+      "revisionNo": 1,
+      "sourceEventAt": "2026-08-11T18:00:00+09:00",
+      "receivedAt": "2026-08-11T18:03:00+09:00",
+      "reportedEtaAt": "2026-08-12T07:00:00+09:00",
+      "payloadStatus": "ACCEPTED"
+    },
+    {
+      "etaEventId": "ETA-MAR-0002",
+      "revisionNo": 2,
+      "sourceEventAt": "2026-08-12T08:55:00+09:00",
+      "receivedAt": "2026-08-12T08:57:00+09:00",
+      "reportedEtaAt": "2026-08-12T14:00:00+09:00",
+      "payloadStatus": "ACCEPTED"
+    },
+    {
+      "etaEventId": "ETA-MAR-0000-LATE",
+      "revisionNo": 0,
+      "sourceEventAt": "2026-08-11T17:00:00+09:00",
+      "receivedAt": "2026-08-12T08:58:00+09:00",
+      "reportedEtaAt": "2026-08-12T06:30:00+09:00",
+      "payloadStatus": "ACCEPTED"
+    },
+    {
+      "etaEventId": "ETA-MAR-0003-FUTURE",
+      "revisionNo": 3,
+      "sourceEventAt": "2026-08-12T09:05:00+09:00",
+      "receivedAt": "2026-08-12T09:07:00+09:00",
+      "reportedEtaAt": "2026-08-12T15:00:00+09:00",
+      "payloadStatus": "ACCEPTED"
+    }
+  ],
+  "cohorts": [
+    {
+      "label": "MISS",
+      "count": 9,
+      "readyOffsetStartMinutes": 140,
+      "readyOffsetStepMinutes": 10,
+      "cutoffAt": "2026-08-12T14:00:00+09:00",
+      "outboundVoyageId": "VYG-DEMO-2609A"
+    },
+    {
+      "label": "TIGHT",
+      "count": 6,
+      "readyOffsetStartMinutes": 160,
+      "readyOffsetStepMinutes": 10,
+      "cutoffAt": "2026-08-12T18:00:00+09:00",
+      "outboundVoyageId": "VYG-DEMO-2609B"
+    },
+    {
+      "label": "KEEP",
+      "count": 21,
+      "readyOffsetStartMinutes": 90,
+      "readyOffsetStepMinutes": 5,
+      "cutoffAt": "2026-08-12T20:00:00+09:00",
+      "outboundVoyageId": "VYG-DEMO-2609C"
+    }
+  ],
+  "expected": {
+    "assessedConnections": 36,
+    "bookingCount": 18,
+    "containerCount": 36,
+    "missCount": 9,
+    "tightCount": 6,
+    "keepCount": 21,
+    "actionPreviewCount": 15,
+    "admittedEtaEventCount": 3,
+    "outOfOrderEventCount": 1,
+    "futureEventExcludedCount": 1,
+    "negativeControlCount": 1,
+    "negativeControlLeakCount": 0,
+    "externalExecutionCount": 0,
+    "bookingTotalTeu": 4
+  },
+  "negativeControls": [
+    {
+      "connectionId": "CONN-MAR-CTRL",
+      "containerId": "CNT-MAR-CTRL",
+      "portCallId": "PC-CTRL-260812"
+    }
+  ],
+  "representative": {
+    "connectionId": "CONN-MAR-001",
+    "readyAt": "2026-08-12T16:20:00+09:00",
+    "cutoffAt": "2026-08-12T14:00:00+09:00",
+    "slackMinutes": -140,
+    "decision": "MISS"
+  }
+}
