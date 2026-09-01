@@ -1,38 +1,38 @@
-# Security and Scope
+# 보안 및 공개 범위
 
-## Included
+## 포함된 내용
 
-This repository intentionally includes only material needed to reproduce a synthetic demonstration:
+이 저장소에는 합성 데모를 재현하는 데 필요한 자료만 포함합니다.
 
-- SQL DDL, seed, contract, decision, semantic, graph, and validation scripts;
-- a small OWL ontology and Graph Studio RDF assets;
-- expected validation counts and documentation.
+- SQL DDL, seed, contract, decision, semantic, graph 및 검증 스크립트
+- 소규모 OWL ontology와 Graph Studio용 RDF 파일
+- 예상 검증 수치와 설명 문서
 
-## Explicitly excluded
+## 명시적으로 제외한 내용
 
-Do not add any of the following to the repository:
+다음 자료는 저장소에 추가하지 않습니다.
 
-- production, partner, employee, or other real operational data;
-- database wallets, credentials, private keys, certificates, tokens, or `.env` files;
-- local connection settings, unredacted console output, trace logs, or screenshots containing environment details;
-- meeting notes, internal decisions, or organization-specific requirements;
-- files that trigger or authorize external actions.
+- 운영 환경, 파트너, 임직원 또는 기타 실제 업무 데이터
+- 데이터베이스 wallet, credential, private key, certificate, token 또는 `.env` 파일
+- 로컬 연결 설정, 비식별화하지 않은 console output, trace log 또는 환경 정보가 포함된 screenshot
+- 회의 기록, 내부 의사결정 또는 특정 조직의 요구사항
+- 외부 조치를 실행하거나 승인하는 파일
 
-## Operational boundary
+## 운영 범위
 
-The project is a decision-support demonstration, not an operational control system.
+이 프로젝트는 의사결정 지원 데모이며 운영 제어 시스템이 아닙니다.
 
-- All scenario identities and records are synthetic.
-- Deterministic SQL creates an assessment; RDF/OWL adds a reusable review category.
-- A review candidate is not an approval, a command, or proof that an operational failure has already occurred.
-- The action layer is read-only and advertises `PREVIEW_ONLY` with external execution disabled.
-- Any AI-generated summary is optional, advisory-only, and must be reviewed by a human; this repository does not include an AI profile, credential, or external model call.
-- Any real-world communication, booking change, terminal instruction, vessel action, or notification requires a separate governed process and human authorization.
+- 시나리오의 모든 ID와 레코드는 합성 데이터입니다.
+- 결정론적 SQL이 상세 판정을 계산하고, RDF/OWL은 재사용 가능한 상위 검토 범주를 추가합니다.
+- 검토 후보라는 결과는 승인이나 명령이 아니며, 실제 운영 장애가 이미 발생했다는 증거도 아닙니다.
+- Action layer는 읽기 전용이며 `PREVIEW_ONLY` 상태와 외부 실행 비활성화를 명시합니다.
+- AI가 생성한 요약은 선택적인 참고 정보이며 사람이 반드시 검토해야 합니다. 이 저장소에는 AI profile, credential 또는 외부 model call이 포함되어 있지 않습니다.
+- 실제 알림, 예약 변경, 터미널 지시, 선박 조치 또는 기타 외부 실행에는 별도의 통제 절차와 사람의 승인이 필요합니다.
 
-## Fail-closed behavior
+## Fail-closed 동작
 
-The SQL scripts check schema identity, required objects, and expected conditions before continuing. If a required precondition or validation fails, treat the output as unavailable rather than attempting to substitute an unverified result.
+SQL 스크립트는 계속 실행하기 전에 schema identity, 필수 객체 및 예상 조건을 확인합니다. 필수 선행 조건이나 검증이 실패하면, 확인되지 않은 결과로 대체해 진행하지 않고 해당 출력을 사용할 수 없는 것으로 처리합니다.
 
-## Responsible reuse
+## 안전한 재사용
 
-If adapting the project for another domain, replace the synthetic fixture, define the domain policy explicitly, preserve point-in-time semantics, and have the responsible business owner validate every decision rule. Do not represent a prototype outcome as a production recommendation.
+이 프로젝트를 다른 업무 영역에 적용할 때는 합성 fixture를 새 업무에 맞게 교체하고, 업무 정책을 명확히 정의하며, 특정 시점 기준 원칙을 유지해야 합니다. 모든 판정 규칙은 해당 업무의 책임자가 검증해야 하며, 프로토타입의 결과를 운영 환경의 권고 사항처럼 표현해서는 안 됩니다.

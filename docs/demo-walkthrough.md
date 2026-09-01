@@ -1,57 +1,57 @@
-# Demo Walkthrough
+# 데모 진행 가이드
 
-## Message to establish first
+## 먼저 전달할 핵심 메시지
 
-This is a synthetic maritime decision-support demo. It helps a reviewer understand a delayed-arrival scenario and its connected bookings; it does not automate an operational action.
+이 데모는 합성 선박–해안 데이터를 사용하는 의사결정 지원 시나리오입니다. 입항 지연 사건과 그 영향을 받는 예약을 검토자가 이해하도록 돕지만, 실제 운영 조치를 자동으로 실행하지는 않습니다.
 
-## 1. Start with the relational facts
+## 1. 관계형 원장 데이터 확인
 
-Show the synthetic tables for ETA events, port calls, container connections, bookings, and containers. Explain that the tables hold the operational facts, but an analyst normally needs multiple joins to understand one late-arrival event and its impact.
+ETA 이벤트, 기항, 컨테이너 연결, 예약, 컨테이너를 저장한 합성 테이블을 먼저 보여줍니다. 이 테이블에는 운영 사실이 담겨 있지만, 하나의 입항 지연 사건과 그 영향을 파악하려면 일반적으로 여러 테이블을 조인해야 한다고 설명합니다.
 
-Then show the point-in-time result:
+다음으로 특정 시점 기준 결과를 확인합니다.
 
-- a declared review time;
-- the latest eligible ETA revision;
-- the resulting connection assessment distribution: 9 `MISS`, 6 `TIGHT`, 21 `KEEP`.
+- 명시적으로 선언된 운영 점검 시각
+- 그 시각까지 수신된 이벤트 중 선택된 최신 ETA revision
+- 연결 판정 분포: `MISS` 9건, `TIGHT` 6건, `KEEP` 21건
 
-Key narration: “The classification is deterministic SQL. The system selects only facts received by the stated review time, calculates the connection timing, and applies the versioned policy.”
+핵심 설명: “판정은 결정론적 SQL로 계산합니다. 시스템은 운영 점검 시각까지 수신된 사실만 선택하고, 연결 가능 시간을 계산한 뒤 버전이 관리되는 정책을 적용합니다.”
 
-## 2. Show semantic meaning in RDF
+## 2. RDF에서 업무 의미 확인
 
-Use the RDF assets or the database RDF network to show that the relational entities and their relationships are represented as triples. The ontology defines these two facts:
+RDF 파일 또는 데이터베이스의 RDF network를 사용해 관계형 개체와 관계가 트리플로 표현된 모습을 보여줍니다. Ontology에는 다음 두 가지 업무 규칙이 정의되어 있습니다.
 
 ```text
 MissAssessment  ──subClassOf──> ReviewCandidateAssessment
 TightAssessment ──subClassOf──> ReviewCandidateAssessment
 ```
 
-Run the same query twice:
+동일한 질의를 두 번 실행합니다.
 
-1. against asserted facts without an OWL rulebase, where direct `ReviewCandidateAssessment` instances are not stored;
-2. with the OWL2RL rulebase applied, where the inferred review-candidate count is 15.
+1. OWL rulebase를 적용하지 않은 명시적 사실만 조회합니다. 이 데이터에는 `ReviewCandidateAssessment` 인스턴스가 직접 저장되어 있지 않습니다.
+2. OWL2RL rulebase를 적용해 추론된 운영 검토 대상 15건을 확인합니다.
 
-Key narration: “The rulebase did not recompute ETA or alter the SQL decision. It added the common business meaning that `MISS` and `TIGHT` both require human review.”
+핵심 설명: “Rulebase는 ETA를 다시 계산하거나 SQL 판정을 변경하지 않습니다. 서로 다른 상세 판정인 `MISS`와 `TIGHT`가 모두 사람의 검토가 필요하다는 공통 업무 의미를 추가합니다.”
 
-## 3. Trace the impact in the Property Graph
+## 3. Property Graph에서 영향 경로 추적
 
-Open the prebuilt Property Graph and show its schema preview. It connects an incident to a port call, voyage, vessel, containers, bookings, and onward voyages.
+미리 만든 Property Graph를 열고 스키마 미리보기를 보여줍니다. 그래프는 지연 사건을 기항, 항차, 선박, 컨테이너, 예약, 다음 항차와 연결합니다.
 
-Begin with a broad graph question, for example:
+먼저 다음과 같은 넓은 범위의 그래프 질문으로 사건의 배경을 확인합니다.
 
-> Show the delayed incident, its port call, port, inbound voyage, and vessel.
+> 지연 사건과 연결된 기항, 항구, 입항 항차, 운항 선박을 보여줘.
 
-Then narrow to the highest-impact connection identified by the deterministic assessment:
+그다음 결정론적 판정에서 확인된 가장 영향이 큰 연결 건으로 범위를 좁힙니다.
 
-> Show the booking, container, and onward voyage connected to the most negative `MISS` connection.
+> 여유시간이 가장 부족한 `MISS` 연결 건과 연결된 예약, 컨테이너, 다음 항차를 보여줘.
 
-Use graph visualization to make the difference clear: the first view gives the incident context; the second isolates a concrete downstream impact path.
+그래프 시각화로 두 결과의 차이를 설명합니다. 첫 번째 결과는 사건의 전체 맥락을 보여주고, 두 번째 결과는 구체적인 후속 영향 경로를 보여줍니다.
 
-## 4. Finish with the human-review boundary
+## 4. 사람의 검토가 필요한 경계 확인
 
-Show the read-only action-preview view for `MISS` and `TIGHT` decisions. It suggests which role should review a candidate and by when, but it neither requests approval nor performs a booking, terminal, vessel, notification, or external-system change.
+`MISS`와 `TIGHT` 판정을 대상으로 하는 읽기 전용 action-preview view를 보여줍니다. 이 화면은 어떤 역할의 담당자가 언제까지 후보를 검토해야 하는지 제안할 뿐, 승인을 요청하거나 예약·터미널·선박·알림·외부 시스템을 변경하지 않습니다.
 
-Key narration: “The output is an explainable work queue for a person. Any operational choice remains outside this demo and under human control.”
+핵심 설명: “결과는 사람이 검토할 수 있도록 근거를 제공하는 업무 목록입니다. 실제 운영 결정은 이 데모의 범위를 벗어나며 반드시 사람이 내립니다.”
 
-## Suggested flow in one line
+## 전체 흐름 요약
 
-**Synthetic facts → point-in-time SQL decision → RDF meaning → Property Graph impact path → human-reviewed preview.**
+**합성 사실 데이터 → 특정 시점 기준 SQL 판정 → RDF 업무 의미 → Property Graph 영향 경로 → 사람 검토용 preview**

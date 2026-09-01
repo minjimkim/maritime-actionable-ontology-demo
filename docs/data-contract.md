@@ -1,47 +1,47 @@
-# Point-in-Time Data Contract
+# 특정 시점 기준 데이터 계약
 
-## Why a time boundary matters
+## 시간 경계가 중요한 이유
 
-Operational decisions must use only the information that was available at the review time. The synthetic fixture declares this review time as `DATA_AS_OF_TS`. An ETA revision received after that time must not change the decision for that review.
+운영 판단에는 검토 시점에 실제로 사용할 수 있었던 정보만 사용해야 합니다. 이 합성 테스트 데이터에서는 검토 시점을 `DATA_AS_OF_TS`로 명시합니다. 해당 시점 이후에 수신된 ETA 변경 정보는 그 시점의 판단에 반영되어서는 안 됩니다.
 
-## Core contract
+## 핵심 계약
 
-For each port call, the decision layer:
+각 기항에 대해 판정 계층은 다음 원칙을 적용합니다.
 
-1. admits ETA events only when `RECEIVED_AT <= DATA_AS_OF_TS`;
-2. uses accepted, in-scope events only;
-3. selects the newest eligible revision for the port call;
-4. calculates estimated container-ready time from the selected ETA and planned ready offset;
-5. compares the timestamp instant with the outbound load cutoff and policy threshold.
+1. `RECEIVED_AT <= DATA_AS_OF_TS` 조건을 만족하는 ETA 이벤트만 사용합니다.
+2. 수락 상태이며 대상 범위에 포함된 이벤트만 사용합니다.
+3. 각 기항에서 사용할 수 있는 가장 최신 revision을 선택합니다.
+4. 선택한 ETA와 계획된 준비 소요시간을 이용해 컨테이너의 예상 준비 완료 시각을 계산합니다.
+5. 계산한 정확한 시각을 다음 항차의 선적 마감 시각 및 정책 기준과 비교합니다.
 
-The contract keeps `SOURCE_EVENT_AT` and `RECEIVED_AT` separate. An event may have occurred earlier but be unavailable to an operator until it is received. This distinction prevents a retrospective view from silently using information that was not known at the stated time.
+이 계약은 `SOURCE_EVENT_AT`과 `RECEIVED_AT`을 구분해 관리합니다. 이벤트가 먼저 발생했더라도 운영 담당자가 이를 수신하기 전에는 사용할 수 없는 정보이기 때문입니다. 두 시각을 구분하면 과거 시점을 재현할 때 당시에는 알 수 없었던 정보를 소급해 사용하는 오류를 막을 수 있습니다.
 
-## Deterministic decision policy
+## 결정론적 판정 정책
 
-The policy is evaluated in SQL from timestamp instants, not from display-rounded minutes:
+정책은 화면 표시용으로 반올림한 분 단위 값이 아니라 정확한 timestamp를 SQL에서 비교해 판정합니다.
 
-| Condition | Decision | Meaning in this demo |
+| 조건 | 판정 | 이 데모에서의 의미 |
 |---|---|---|
-| Estimated ready time is after the load cutoff | `MISS` | The connection cannot meet the configured cutoff under the selected facts. |
-| Estimated ready time is before the cutoff but inside the configured threshold | `TIGHT` | The connection remains possible but needs additional human attention. |
-| Estimated ready time is at or before the threshold boundary | `KEEP` | The current plan remains within the configured policy boundary. |
+| 예상 준비 완료 시각이 선적 마감 시각보다 늦음 | `MISS` | 선택된 사실과 정책을 기준으로 해당 환적 연결이 설정된 마감 시각을 충족할 수 없습니다. |
+| 예상 준비 완료 시각이 마감 전이지만 설정된 임계 범위 안에 있음 | `TIGHT` | 환적 연결은 가능하지만 사람이 추가로 확인해야 합니다. |
+| 예상 준비 완료 시각이 임계 경계 시각과 같거나 그보다 빠름 | `KEEP` | 현재 계획이 설정된 정책 범위 안에 있습니다. |
 
-`CONNECTION_SLACK_MINUTES` is a useful display value, but the policy uses exact timestamp comparisons. The SQL result is a closed-world decision for the declared fixture, policy version, and as-of time.
+`CONNECTION_SLACK_MINUTES`는 화면에서 여유시간을 확인하는 데 유용하지만, 실제 정책은 정확한 timestamp를 비교합니다. SQL 결과는 명시된 합성 테스트 데이터, 정책 버전, 기준 시점에 대해 닫힌 범위에서 내린 판정입니다.
 
-## Provenance fields
+## 출처 및 추적 정보
 
-The pipeline carries the following context with its decisions and semantic facts:
+파이프라인은 판정 및 의미 트리플과 함께 다음 정보를 유지합니다.
 
-| Field | Purpose |
+| 필드 | 목적 |
 |---|---|
-| `FIXTURE_VERSION` | Identifies the synthetic fixture. |
-| `CONTRACT_VERSION` | Identifies the point-in-time selection logic. |
-| `POLICY_VERSION` | Identifies the decision boundary and thresholds. |
-| `ONTOLOGY_VERSION` | Identifies the semantic vocabulary used for inference. |
-| `DATA_AS_OF_TS` | Declares the latest information permitted for the review. |
-| `RUN_MODE` / `RESULT_PROVENANCE` | Marks the output as synthetic demonstration material. |
-| `APPROVAL_STATE` / `EXTERNAL_EXECUTION_YN` | Explicitly records preview-only, no-execution behavior. |
+| `FIXTURE_VERSION` | 사용한 합성 테스트 데이터 버전을 식별합니다. |
+| `CONTRACT_VERSION` | 특정 시점 기준 선택 로직의 버전을 식별합니다. |
+| `POLICY_VERSION` | 판정 경계와 임계값의 버전을 식별합니다. |
+| `ONTOLOGY_VERSION` | 추론에 사용한 의미 어휘의 버전을 식별합니다. |
+| `DATA_AS_OF_TS` | 검토에 사용할 수 있는 정보의 최종 시점을 명시합니다. |
+| `RUN_MODE` / `RESULT_PROVENANCE` | 결과가 합성 데모 자료에서 생성됐음을 표시합니다. |
+| `APPROVAL_STATE` / `EXTERNAL_EXECUTION_YN` | 미리보기 전용이며 외부 실행이 비활성화됐음을 명시합니다. |
 
-## Expected fixture results
+## 합성 테스트 데이터의 예상 결과
 
-At the declared synthetic as-of time, the fixture contains 36 assessed connections: 9 `MISS`, 6 `TIGHT`, and 21 `KEEP`. The 15 `MISS` and `TIGHT` assessments become semantic review candidates through the ontology hierarchy; that inference never changes the underlying deterministic decision.
+명시된 합성 기준 시점에서 평가 대상 환적 연결은 총 36건이며, 결과는 `MISS` 9건, `TIGHT` 6건, `KEEP` 21건입니다. `MISS`와 `TIGHT` 15건은 온톨로지 계층을 통해 의미상 추가 검토 후보가 됩니다. 이 추론은 SQL에서 결정한 기존 판정 자체를 변경하지 않습니다.
