@@ -1,105 +1,183 @@
-# Maritime Actionable Ontology | 데이터·그래프·AI 의사결정 지원 데모
+# Maritime Actionable Ontology | Data, Graph & AI Decision-Support Demo
 
-**한국어** | [English portfolio overview](README.en.md)
+[Full English documentation](README.en.md)
 
-선박 입항 지연이 환적 연결과 고객 예약에 미치는 영향을 추적하는 **완전 합성(synthetic) 선박–해안 의사결정 지원 레퍼런스 구현**입니다. 관계형 원장, 특정 시점 기준 데이터 계약, 결정론적 SQL 판정, RDF/OWL 의미 추론, Property Graph 경로 분석을 하나의 검증 가능한 흐름으로 연결합니다.
+**A fully synthetic maritime ship-to-shore decision-support reference implementation designed for Oracle Database and Graph Studio, connecting point-in-time data contracts, deterministic decisions, RDF/OWL semantic inference, Property Graph traceability, and human-reviewed action previews.**
 
-> 이 저장소에는 합성 테스트 데이터만 포함되어 있습니다. 고객 또는 운영 데이터가 아니며, 예약·운항 일정을 변경하거나 외부 시스템의 운영 조치를 실행하지 않습니다.
+> **Synthetic-data notice:** Every vessel, voyage, port call, booking, container, timestamp, and decision in this repository is fictional and deterministically generated. No customer or production data, proprietary operating rules, credentials, or environment-specific connection details are included.
 
-## 프로젝트가 해결하는 문제
+## Business Problem
 
-선박의 ETA가 늦어지면 영향은 한 개의 일정에서 끝나지 않습니다. 입항 기항, 컨테이너 하역 준비시간, 다음 항차의 적재 마감, 고객 예약을 함께 확인해야 합니다. 관계형 테이블만 사용할 경우 이러한 영향을 파악하려면 여러 테이블과 시간 조건을 조합해야 하고, 판정 코드의 공통 업무 의미도 각 시스템에서 따로 관리하기 쉽습니다.
+A delayed vessel ETA can affect far more than one arrival schedule. Reviewers may need to connect the delay event to a port call, container readiness, an outbound loading cutoff, the next voyage, and customer bookings. In a relational environment, that investigation requires multiple joins and explicit time boundaries, while the shared business meaning of decision codes can easily be duplicated across reports and applications.
 
-이 프로젝트는 다음과 같이 문제를 나눠 해결합니다.
+This demo separates those responsibilities. SQL selects only facts available at the declared review time and deterministically evaluates each connection as `MISS`, `TIGHT`, or `KEEP`. RDF/OWL adds the reusable meaning that `MISS` and `TIGHT` are both review candidates without recalculating time. A Property Graph then traces the impact path across connected maritime entities. The final output remains a read-only advisory for human review.
 
-- **SQL**은 점검 시점에 실제로 알 수 있었던 정보만 선택하고 `MISS`, `TIGHT`, `KEEP`을 계산합니다.
-- **RDF/OWL**은 시간을 다시 계산하지 않고 `MISS`와 `TIGHT`에 ‘추가 검토 후보’라는 재사용 가능한 업무 의미를 부여합니다.
-- **Property Graph**는 지연 사건에서 기항·항차·선박·컨테이너·예약으로 이어지는 영향 경로를 탐색합니다.
-- **조치 미리보기**는 사람이 검토할 후보만 읽기 전용으로 제공하며 외부 실행은 차단합니다.
+## At a Glance
 
-## 핵심 구현 내용
+| Area | Implemented scope |
+|---|---|
+| Technology | Oracle SQL/PLSQL, RDF/OWL2RL, SPARQL, SQL Property Graph, Graph Studio, Node.js validation |
+| Scenario | One synthetic ETA revision from 07:00 to 14:00; 420-minute delay evaluated at 09:00 KST |
+| Relational model | 11 maritime business tables + 3 demo contract/control tables |
+| Point-in-time control | Future revision received after the review timestamp is excluded |
+| Deterministic decisions | 36 connections: `MISS` 9, `TIGHT` 6, `KEEP` 21 |
+| RDF/OWL semantics | 134 TBox triples, 664 ABox triples, 15 inferred review candidates |
+| Property Graph | 71 vertices, 158 edges, and 36 incident-to-booking paths |
+| Quality and lineage | Fixture, contract, policy, ontology, and as-of versions; 0 future-event, mismatch, or negative-control leaks |
+| Safety boundary | `PREVIEW_ONLY`, human review required, 0 automatic actions, 0 external executions |
+| AI scope | Controlled advisory handoff only; no public AI profile, credential, or external model call |
 
-- 운영 점검 이후 수신된 미래 정보를 제외하는 **특정 시점 기준(point-in-time) 데이터 계약**
-- 컨테이너 환적 연결을 `MISS`, `TIGHT`, `KEEP`으로 분류하는 **결정론적 SQL 판정 로직**
-- `MISS`와 `TIGHT`를 공통 `ReviewCandidateAssessment`로 추론하는 **RDF/OWL 의미 계층**
-- 사건부터 예약과 다음 항차까지 연결하는 **Property Graph 추적 구조**
-- 합성 데이터 건수, 의미 일관성, 그래프 구조, 안전 경계를 확인하는 **재현 가능한 검증 게이트**
-- `PREVIEW_ONLY`, 사람 검토, 외부 실행 금지를 명시한 **읽기 전용 조치 미리보기**
-- AI 권고를 위한 통제된 연결 지점. 공개 저장소에는 AI 프로필, 자격증명, 외부 모델 호출이 포함되지 않습니다.
-
-## 아키텍처
+## Architecture
 
 ```mermaid
 flowchart LR
-  R["합성 관계형 업무 원장"] --> P["특정 시점 기준 데이터 계약"]
-  P --> D["결정론적 SQL 판정<br/>MISS · TIGHT · KEEP"]
-  D --> S["RDF 사실 + OWL 업무 계층"]
-  S --> I["의미 추론<br/>ReviewCandidateAssessment"]
-  D --> G["Property Graph 영향 경로"]
-  I --> H["사람의 추가 검토 후보"]
+  R["Synthetic relational ledger"] --> P["Point-in-time data contract"]
+  P --> D["Deterministic SQL decisions<br/>MISS · TIGHT · KEEP"]
+  D --> S["RDF asserted facts"]
+  S --> O["OWL hierarchy and inference<br/>ReviewCandidateAssessment"]
+  D --> G["Property Graph<br/>impact traceability"]
+  O --> H["Human-reviewed advisory"]
   G --> H
-  H --> A["읽기 전용 조치 미리보기"]
-  A -. "자동 실행 없음" .-> X["외부 시스템"]
+  H --> A["Read-only action preview"]
+  A -. "no automatic execution" .-> X["External systems"]
 ```
 
-SQL 계층은 시간 계산과 판정 경계를 책임집니다. RDF/OWL은 `MissAssessment`와 `TightAssessment`가 `ReviewCandidateAssessment`의 하위 유형이라는 공통 업무 의미를 추가합니다. Property Graph는 연결된 업무 객체 사이의 경로와 영향 범위를 보여줍니다. 어떤 후보도 자동 조치로 이어지지 않으며 최종 판단은 사람에게 남습니다.
+## My Role and Contributions
 
-## 설계 및 검증 범위
+I translated an ambiguous delayed-ETA business question into a bounded, reproducible Data, Graph, and AI decision-support demonstration.
 
-- 지연 ETA라는 업무 문제를 데이터 계약과 버전이 있는 판정 규칙으로 구체화
-- 미래 정보가 섞이지 않도록 이벤트 발생 시각과 수신 시각을 분리
-- 합성 업무 데이터와 기대 결과가 항상 동일하게 재현되도록 fixture 구성
-- SQL 판정, RDF/OWL 추론, Property Graph 추적의 역할을 분리
-- 데이터 계보와 버전 정보를 판정 및 의미 사실에 함께 전달
-- 전제조건이나 검증 결과가 맞지 않으면 결과를 사용하지 않는 `fail-closed` 방식 적용
-- AI 결과는 선택적 권고로만 연결하고 사람 검토 및 `preview-only` 경계 유지
+- Framed the ship-to-shore review journey and mapped each business question to relational calculation, semantic inference, or graph traversal.
+- Designed the synthetic maritime data model, stable IDs, versioned fixtures, explicit grains, and point-in-time data contract.
+- Implemented deterministic SQL logic that separates event occurrence time from receipt time and prevents future-data leakage.
+- Defined the RDF/OWL business hierarchy that groups `MissAssessment` and `TightAssessment` under `ReviewCandidateAssessment`.
+- Built the Property Graph projections for tracing delay impact across incidents, port calls, voyages, vessels, containers, and bookings.
+- Added expected-count reconciliation, lineage fields, negative controls, and fail-closed prerequisites.
+- Kept every downstream output human-reviewed and preview-only, with external execution explicitly disabled.
+- Generalized the project into a public synthetic kit with customer-specific names, data, credentials, logs, and environment details removed.
+
+## Validation Status
+
+“Implemented,” “repository-validated,” and “externally executed” are deliberately kept separate.
+
+| Capability | Status |
+|---|---|
+| Public-scope and reserved-marker checks | **Repository-validated** with `npm test` |
+| Synthetic decision contract: 36 / 9 / 6 / 21 / 15 | **Repository-validated** against versioned expected results |
+| OWL subclass assertions and Graph Studio asset checksums | **Repository-validated** |
+| Point-in-time SQL pipeline | **Implemented**; requires execution in a dedicated Oracle demo schema |
+| RDF network, rulebase, and SPARQL runtime | **Reproducible assets included**; requires Oracle RDF runtime execution |
+| SQL Property Graph creation and path validation | **Implemented**; requires Oracle Database and Graph Studio execution |
+| Read-only action preview | **Implemented** with external execution disabled by contract |
+| External AI advisory or operational integration | **Not included**; controlled handoff boundary only |
+
+## Scope and Safety Boundaries
+
+- This is a technical decision-support demonstration, not a production deployment or customer implementation.
+- A `MISS` is a deterministic synthetic-fixture result, not proof that a real transshipment failure occurred.
+- A `ReviewCandidateAssessment` identifies a human review candidate; it is not an approval or operational command.
+- SQL owns time arithmetic and decision boundaries. RDF/OWL adds shared meaning but does not replace or mutate the SQL decision.
+- Property Graph traversal explains connected impact paths but does not calculate decisions or execute actions.
+- The action layer is read-only and carries `PREVIEW_ONLY` and `EXTERNAL_EXECUTION_YN = 'N'`.
+- No script sends a message, changes a booking, instructs a terminal, or calls an external operational system.
+
+---
+
+# 상세 가이드 (한국어): 해상 운송 Actionable Ontology 데모
+
+이번 프로젝트는 선박 입항 지연이 환적 연결과 고객 예약에 미치는 영향을 추적하는 **완전 합성 선박–해안 의사결정 지원 데모**입니다. 관계형 원장, 특정 시점 기준 데이터 계약, 결정론적 SQL 판정, RDF/OWL 의미 추론, Property Graph 경로 분석을 하나의 검증 가능한 흐름으로 연결합니다.
+
+> 이 저장소에는 합성 테스트 데이터만 포함되어 있습니다. 고객 또는 운영 데이터가 아니며, 예약·운항 일정을 변경하거나 외부 시스템의 운영 조치를 실행하지 않습니다.
+
+## 데모 스토리
+
+1. **관계형 업무 원장** — 선박, 항차, 기항, ETA 변경 이력, 예약, 컨테이너, 환적 연결 계획을 합성 테이블로 구성합니다.
+2. **특정 시점 기준 판정** — 오전 9시까지 수신된 ETA revision만 선택하고 연결별 여유시간을 계산해 `MISS`, `TIGHT`, `KEEP`으로 판정합니다.
+3. **RDF/OWL 의미 추론** — 서로 다른 판정인 `MISS`와 `TIGHT`를 모두 사람이 추가 확인해야 하는 `ReviewCandidateAssessment`로 추론합니다.
+4. **Property Graph 영향 경로** — 지연 사건에서 기항·항차·선박·컨테이너·예약·다음 항차로 이어지는 경로를 탐색합니다.
+5. **사람 검토용 미리보기** — 검토 후보와 근거를 읽기 전용으로 제공하며 자동 조치와 외부 실행은 허용하지 않습니다.
+
+```mermaid
+flowchart LR
+  A["ETA 변경 사건<br/>07:00 → 14:00"] --> B["09:00 특정 시점 계약"]
+  B --> C["36개 환적 연결 판정"]
+  C --> D["MISS 9"]
+  C --> E["TIGHT 6"]
+  C --> F["KEEP 21"]
+  D --> R["RDF/OWL 검토 후보"]
+  E --> R
+  R --> V["15건 사람 검토"]
+  C --> P["Property Graph 영향 경로"]
+  P --> V
+  V --> Q["PREVIEW_ONLY"]
+```
 
 ## 저장소 구성
 
-| 경로 | 내용 |
+| 경로 | 용도 |
 |---|---|
-| [`sql/`](sql/) | 스키마, 합성 데이터, 판정, RDF, Property Graph, 읽기 전용 미리보기 SQL |
-| [`ontology/`](ontology/) | 의미 계층과 업무 용어를 정의한 OWL 온톨로지 |
-| [`graph-studio/`](graph-studio/) | 재현 가능한 Graph Studio RDF 자산과 SPARQL 검증 질의 |
-| [`tests/expected/`](tests/expected/) | 합성 시나리오의 기대 건수와 검증 기준 |
-| [`docs/`](docs/) | 아키텍처, 데이터 계약, 시연 흐름, 공개 범위 문서 |
+| [`sql/`](sql/) | 스키마, 합성 데이터, 특정 시점 판정, RDF, Property Graph, 읽기 전용 미리보기 SQL |
+| [`ontology/`](ontology/) | 업무 유형과 상하위 의미를 정의한 OWL 온톨로지 |
+| [`graph-studio/`](graph-studio/) | Graph Studio 가져오기용 TBox/ABox와 SPARQL 검증 질의 |
+| [`tests/expected/`](tests/expected/) | 합성 시나리오의 버전, 기대 건수, 검증 기준 |
+| [`docs/`](docs/) | 아키텍처, 데이터 계약, 데모 진행, 공개 및 보안 범위 문서 |
+| [`scripts/`](scripts/) | 공개 범위, 수치, 온톨로지, 자산 무결성 검증 |
 
-## 빠른 실행
+## 현재 상태와 기대 결과
 
-전용 `MARITIME_DEMO` 데모 스키마에 직접 접속한 뒤 SQL 파일을 번호 순서대로 실행합니다. 필수 스키마나 선행 조건이 맞지 않으면 스크립트는 계속 진행하지 않고 중단됩니다.
+공개 저장소는 일반화된 합성 객체와 재현 가능한 스크립트로 구성했습니다. 저장소 검증은 판정 수치, 핵심 OWL 선언, Graph Studio 자산 checksum, 고객 원본 표식의 부재를 확인합니다. Oracle Database에서의 SQL/RDF/Property Graph 실행은 전용 데모 스키마와 해당 런타임이 필요하며, 외부 AI 호출은 이 공개 키트에 포함하지 않습니다.
 
-1. [`sql/00-setup/00_preflight.sql`](sql/00-setup/00_preflight.sql)을 실행합니다.
-2. [`sql/01-data/`](sql/01-data/)에서 합성 관계형 데이터를 생성하고 검증합니다.
-3. [`sql/02-decision/`](sql/02-decision/)에서 특정 시점 기준 계약과 결정론적 판정을 생성합니다.
-4. [`sql/02-semantics/`](sql/02-semantics/)에서 RDF 네트워크와 온톨로지를 구성하고 추론을 검증합니다.
-5. [`sql/03-property-graph/`](sql/03-property-graph/)에서 Property Graph를 생성하고 경로 구조를 검증합니다.
-6. [`sql/04-action/`](sql/04-action/)에서 읽기 전용 조치 미리보기를 생성합니다.
-7. 필요하면 Graph Studio 가져오기 자산을 다시 생성합니다.
+선언된 기준 시점은 `2026-08-12 09:00 +09:00`입니다. ETA는 07시에서 14시로 420분 변경됐으며, 08시 57분까지 수신된 revision 2는 사용하고 09시 07분에 수신된 미래 revision은 제외합니다.
 
-   ```bash
-   npm run build:graph-studio-assets
-   ```
-
-발표 흐름은 [`docs/demo-walkthrough.md`](docs/demo-walkthrough.md), 공개 및 안전 경계는 [`docs/security-and-scope.md`](docs/security-and-scope.md)에서 확인할 수 있습니다.
-
-## 합성 시나리오의 기대 결과
-
-선언된 점검 시점을 기준으로 합성 컨테이너 환적 연결 36건을 평가합니다.
-
-| 결정론적 판정 | 기대 건수 |
+| 검증 항목 | 기대 결과 |
 |---|---:|
+| 평가 대상 환적 연결 | 36 |
+| 연결된 컨테이너 | 36 |
+| 연결된 예약 | 18 |
 | `MISS` | 9 |
 | `TIGHT` | 6 |
 | `KEEP` | 21 |
-| 의미 기반 추가 검토 후보 (`MISS + TIGHT`) | 15 |
+| 의미 기반 추가 검토 후보 | 15 |
+| 자동 조치 / 외부 실행 | 0 / 0 |
 
-이 숫자는 합성 fixture의 검증 기대값이며 운영 권고가 아닙니다. `MISS`는 실제 환적 실패가 발생했다는 증거가 아니고, 추가 검토 후보 15건 역시 조치 승인 건수가 아닙니다.
+이 수치는 합성 fixture의 테스트 기대값이지 운영 권고가 아닙니다. `MISS` 9건은 실제 환적 실패가 발생했다는 뜻이 아니며, 검토 후보 15건도 승인 또는 조치 건수가 아닙니다.
 
-## 안전 및 공개 범위
+## 실행 순서
 
-- 모든 선박, 항차, 항구, 기항, 예약, 컨테이너, 시각, 판정은 합성 데이터입니다.
-- 이 프로젝트는 의사결정 지원용이며 운영 선택의 책임은 사람에게 있습니다.
-- `PREVIEW_ONLY`와 `EXTERNAL_EXECUTION_YN = 'N'`을 데이터 계약과 조치 미리보기 계층에 전달합니다.
-- 자격증명, Wallet, 개인 키, 로컬 환경 파일, 실행 로그, 운영 데이터 추출본을 저장소에 추가하지 않습니다.
+전용 `MARITIME_DEMO` 데모 스키마에 직접 접속한 뒤 SQL 파일을 번호 순서대로 실행합니다. 필수 스키마나 선행 조건이 맞지 않으면 스크립트는 확인되지 않은 결과로 계속 진행하지 않고 중단됩니다.
 
-자세한 내용은 [`docs/security-and-scope.md`](docs/security-and-scope.md)를 참고하세요.
+1. [`sql/00-setup/00_preflight.sql`](sql/00-setup/00_preflight.sql)에서 실행 사용자와 필수 전제조건을 확인합니다.
+2. [`sql/01-data/`](sql/01-data/)에서 합성 관계형 원장과 기준 시나리오를 생성합니다.
+3. [`sql/02-decision/`](sql/02-decision/)에서 특정 시점 기준 계약과 결정론적 판정을 생성합니다.
+4. [`sql/02-semantics/`](sql/02-semantics/)에서 RDF network, ontology, 사실 트리플, 추론 결과를 구성합니다.
+5. [`sql/03-property-graph/`](sql/03-property-graph/)에서 Property Graph와 경로 검증 객체를 생성합니다.
+6. [`sql/04-action/`](sql/04-action/)에서 읽기 전용 조치 미리보기를 생성합니다.
+
+Graph Studio 자산을 다시 생성하고 공개 저장소 검증을 실행하려면 다음 명령을 사용합니다.
+
+```bash
+npm run build:graph-studio-assets
+npm test
+```
+
+## 핵심 설계 원칙
+
+- **시점 일관성:** `SOURCE_EVENT_AT`과 `RECEIVED_AT`을 분리하고 `RECEIVED_AT <= DATA_AS_OF_TS`인 사실만 사용합니다.
+- **결정론적 계산:** 시간 계산과 `MISS`·`TIGHT`·`KEEP` 판정은 exact timestamp를 사용하는 SQL 정책이 담당합니다.
+- **의미와 계산의 분리:** RDF/OWL은 시간을 다시 계산하지 않고 상세 판정에 재사용 가능한 상위 업무 의미를 부여합니다.
+- **경로와 판정의 분리:** Property Graph는 영향 경로를 탐색하지만 판정이나 조치를 생성하지 않습니다.
+- **추적 가능성:** fixture, contract, policy, ontology, 기준 시점 버전을 결과와 함께 유지합니다.
+- **안전한 중단:** 전제조건이나 검증 결과가 맞지 않으면 `fail-closed` 방식으로 중단합니다.
+- **사람 중심 의사결정:** 모든 후속 결과는 `human-reviewed`, `preview-only`이며 자동 실행으로 이어지지 않습니다.
+
+## 상세 문서
+
+- [아키텍처와 계층별 역할](docs/architecture.md)
+- [특정 시점 기준 데이터 계약](docs/data-contract.md)
+- [데모 진행 가이드](docs/demo-walkthrough.md)
+- [보안 및 공개 범위](docs/security-and-scope.md)
+- [SQL 실행 순서](sql/README.md)
+- [전체 영문 포트폴리오 설명](README.en.md)
+
+## 주의 사항
+
+이 프로젝트는 제품 기능과 설계 접근법을 설명하기 위한 합성 데이터 데모입니다. 결과를 실제 운항, 환적 실패 판정, 예약 변경, 고객 통지 또는 외부 시스템 실행의 근거로 사용할 수 없습니다. 실제 업무 적용에는 별도의 데이터 검증, 정책 승인, 보안 통제, 책임자 검토가 필요합니다.
